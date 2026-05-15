@@ -13,8 +13,17 @@ import '../core/constants/app_strings.dart';
 import '../providers/auth_provider.dart';
 import '../screens/auth/login_screen.dart';
 import '../screens/dashboard/dashboard_screen.dart';
+import '../screens/fleet/fleet_screen.dart';
+import '../screens/threats/threat_screen.dart';
+import '../screens/logistics/logistics_screen.dart';
+import '../screens/settings/settings_screen.dart';
+import '../screens/maintenance/maintenance_screen.dart';
+import '../screens/manufacturing/manufacturing_screen.dart';
+import '../screens/sales/sales_screen.dart';
+import '../screens/ai_assistant/ai_assistant_screen.dart';
+import '../providers/dashboard_provider.dart';
+import '../core/constants/app_colors.dart';
 import '../widgets/loading_widget.dart';
-import 'routes.dart';
 
 class AmopsApp extends ConsumerWidget {
   const AmopsApp({super.key});
@@ -36,27 +45,35 @@ class AmopsApp extends ConsumerWidget {
   }
 }
 
-class MainShell extends StatefulWidget {
+class MainShell extends ConsumerStatefulWidget {
   const MainShell({super.key});
 
   @override
-  State<MainShell> createState() => _MainShellState();
+  ConsumerState<MainShell> createState() => _MainShellState();
 }
 
-class _MainShellState extends State<MainShell> {
+class _MainShellState extends ConsumerState<MainShell> {
   int _selectedIndex = 0;
 
   final List<Widget> _screens = [
     const DashboardScreen(),
-    const Center(child: Text("Fleet")),
-    const Center(child: Text("Threats")),
-    const Center(child: Text("Logistics")),
-    const Center(child: Text("More")),
+    const FleetScreen(),
+    const ThreatScreen(),
+    const LogisticsScreen(),
+    const SettingsScreen(),
   ];
 
   @override
   Widget build(BuildContext context) {
+    // Listen to dashboard provider for seeding logic
+    ref.listen(dashboardProvider, (previous, next) {
+      if (next.isSeeding) {
+        // Show seeding indicator if needed
+      }
+    });
+
     return Scaffold(
+      drawer: const AppDrawer(),
       body: _screens[_selectedIndex],
       bottomNavigationBar: BottomNavigationBar(
         currentIndex: _selectedIndex,
@@ -70,9 +87,62 @@ class _MainShellState extends State<MainShell> {
           BottomNavigationBarItem(icon: Icon(Icons.airplanemode_active), label: "Fleet"),
           BottomNavigationBarItem(icon: Icon(Icons.warning_amber), label: "Threats"),
           BottomNavigationBarItem(icon: Icon(Icons.inventory), label: "Logistics"),
-          BottomNavigationBarItem(icon: Icon(Icons.menu), label: "More"),
+          BottomNavigationBarItem(icon: Icon(Icons.settings), label: "Settings"),
         ],
       ),
+    );
+  }
+}
+
+class AppDrawer extends ConsumerWidget {
+  const AppDrawer({super.key});
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final authState = ref.watch(authProvider);
+    final user = authState.user;
+
+    return Drawer(
+      backgroundColor: AppColors.background,
+      child: Column(
+        children: [
+          UserAccountsDrawerHeader(
+            decoration: const BoxDecoration(color: AppColors.card),
+            accountName: Text(user?.name ?? "User", style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
+            accountEmail: Text(user?.email ?? "", style: const TextStyle(color: Colors.white60)),
+            currentAccountPicture: CircleAvatar(
+              backgroundColor: AppColors.primary,
+              child: Text(user?.name.isNotEmpty == true ? user!.name[0].toUpperCase() : "U", style: const TextStyle(color: Colors.black)),
+            ),
+          ),
+          _buildDrawerItem(context, Icons.build, AppStrings.maintenance, const MaintenanceScreen()),
+          _buildDrawerItem(context, Icons.factory, AppStrings.manufacturing, const ManufacturingScreen()),
+          _buildDrawerItem(context, Icons.trending_up, AppStrings.sales, const SalesScreen()),
+          _buildDrawerItem(context, Icons.psychology, AppStrings.aiAssistant, const AIAssistantScreen()),
+          const Spacer(),
+          const Divider(color: Colors.white10),
+          ListTile(
+            leading: const Icon(Icons.logout, color: AppColors.danger),
+            title: const Text(AppStrings.logout, style: TextStyle(color: AppColors.danger)),
+            onTap: () {
+              Navigator.pop(context);
+              ref.read(authProvider.notifier).logout();
+            },
+          ),
+          const SizedBox(height: 20),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDrawerItem(BuildContext context, IconData icon, String title, Widget screen) {
+    return ListTile(
+      leading: Icon(icon, color: AppColors.primary),
+      title: Text(title, style: const TextStyle(color: Colors.white)),
+      onTap: () {
+        Navigator.pop(context);
+        Navigator.push(context, MaterialPageRoute(builder: (context) => screen));
+      },
     );
   }
 }
