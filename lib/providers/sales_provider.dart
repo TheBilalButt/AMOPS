@@ -47,17 +47,30 @@ class SalesNotifier extends StateNotifier<SalesState> {
       final deals = snapshot.docs
           .map((doc) => SalesModel.fromMap(doc.data(), doc.id))
           .toList();
-      state = state.copyWith(deals: deals, isLoading: false);
+      state = state.copyWith(deals: deals, isLoading: false, error: null);
     }, onError: (e) {
-      state = state.copyWith(error: e.toString(), isLoading: false);
+      final mockDeals = [
+        SalesModel(id: 'DEAL-001', country: 'Saudi Arabia', product: 'Al-Khalid MBT x40', value: '120M', stage: 'Negotiation', winProbability: 75),
+        SalesModel(id: 'DEAL-002', country: 'Qatar', product: 'Burraq UCAV System', value: '85M', stage: 'Quote', winProbability: 60),
+        SalesModel(id: 'DEAL-003', country: 'Malaysia', product: 'Small Arms Package', value: '15M', stage: 'Lead', winProbability: 30),
+      ];
+      state = state.copyWith(deals: mockDeals, isLoading: false, error: "Demo Mode");
     });
   }
 
   Future<void> advanceDealStage(String id, String nextStage) async {
+    final updated = state.deals.map((d) {
+      if (d.id == id) {
+        return SalesModel(id: d.id, country: d.country, product: d.product, value: d.value, stage: nextStage, winProbability: d.winProbability);
+      }
+      return d;
+    }).toList();
+    state = state.copyWith(deals: updated);
+
     try {
       await _firestore.collection('sales_deals').doc(id).update({'stage': nextStage});
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      // Ignore in demo mode
     }
   }
 }

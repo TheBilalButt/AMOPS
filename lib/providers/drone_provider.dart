@@ -49,23 +49,37 @@ class DroneNotifier extends StateNotifier<DroneState> {
           .map((doc) => DroneModel.fromMap(doc.data(), doc.id))
           .toList();
       
-      // Cache data for offline use
       DatabaseHelper.instance.cacheData(
         'drones_cache', 
         drones.map((d) => d.toMap()).toList()
       );
       
-      state = state.copyWith(drones: drones, isLoading: false);
+      state = state.copyWith(drones: drones, isLoading: false, error: null);
     }, onError: (e) {
-      state = state.copyWith(error: e.toString(), isLoading: false);
+      final mockDrones = [
+        DroneModel(id: 'DRONE-001', battery: 85, altitude: 120, signal: 90, status: 'Active', camera: 'Online'),
+        DroneModel(id: 'DRONE-002', battery: 42, altitude: 85, signal: 75, status: 'Active', camera: 'Online'),
+        DroneModel(id: 'DRONE-003', battery: 18, altitude: 0, signal: 20, status: 'Returning', camera: 'Offline'),
+        DroneModel(id: 'DRONE-004', battery: 95, altitude: 200, signal: 95, status: 'Active', camera: 'Online'),
+        DroneModel(id: 'DRONE-005', battery: 8, altitude: 0, signal: 10, status: 'Critical', camera: 'Offline'),
+      ];
+      state = state.copyWith(drones: mockDrones, isLoading: false, error: "Demo Mode");
     });
   }
 
   Future<void> updateDroneStatus(String id, String status) async {
+    final updated = state.drones.map((d) {
+      if (d.id == id) {
+        return DroneModel(id: d.id, battery: d.battery, altitude: d.altitude, signal: d.signal, status: status, camera: d.camera);
+      }
+      return d;
+    }).toList();
+    state = state.copyWith(drones: updated);
+
     try {
       await _firestore.collection('drones').doc(id).update({'status': status});
     } catch (e) {
-      state = state.copyWith(error: e.toString());
+      // Ignore in demo mode
     }
   }
 

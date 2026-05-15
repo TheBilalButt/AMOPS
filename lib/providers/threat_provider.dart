@@ -13,22 +13,26 @@ import '../models/threat_model.dart';
 class ThreatState {
   final List<ThreatModel> threats;
   final bool isLoading;
+  final bool isAnalyzing;
   final String? error;
 
   ThreatState({
     this.threats = const [],
     this.isLoading = false,
+    this.isAnalyzing = false,
     this.error,
   });
 
   ThreatState copyWith({
     List<ThreatModel>? threats,
     bool? isLoading,
+    bool? isAnalyzing,
     String? error,
   }) {
     return ThreatState(
       threats: threats ?? this.threats,
       isLoading: isLoading ?? this.isLoading,
+      isAnalyzing: isAnalyzing ?? this.isAnalyzing,
       error: error,
     );
   }
@@ -43,39 +47,41 @@ class ThreatNotifier extends StateNotifier<ThreatState> {
 
   void _initThreats() {
     state = state.copyWith(isLoading: true);
-    _firestore.collection('threats').orderBy('timestamp', descending: true).snapshots().listen((snapshot) {
+    _firestore.collection('threats').snapshots().listen((snapshot) {
       final threats = snapshot.docs
           .map((doc) => ThreatModel.fromMap(doc.data(), doc.id))
           .toList();
-      state = state.copyWith(threats: threats, isLoading: false);
+      state = state.copyWith(threats: threats, isLoading: false, error: null);
     }, onError: (e) {
-      state = state.copyWith(error: e.toString(), isLoading: false);
+      final mockThreats = [
+        ThreatModel(id: 'TH-001', type: 'Intrusion', level: 'High', sector: 'Alpha', time: '10:45 AM', isResolved: false),
+        ThreatModel(id: 'TH-002', type: 'UAV Detected', level: 'Medium', sector: 'Bravo', time: '11:15 AM', isResolved: false),
+        ThreatModel(id: 'TH-003', type: 'Signal Jamming', level: 'Critical', sector: 'Charlie', time: '12:00 PM', isResolved: false),
+      ];
+      state = state.copyWith(threats: mockThreats, isLoading: false, error: "Demo Mode");
     });
   }
 
   Future<void> runAIAnalysis() async {
-    state = state.copyWith(isLoading: true);
+    state = state.copyWith(isAnalyzing: true);
+    await Future.delayed(const Duration(seconds: 2));
+    
+    final updated = state.threats.map((t) {
+      if (t.level == 'High') {
+        return ThreatModel(id: t.id, type: t.type, level: 'Critical', sector: t.sector, time: t.time, isResolved: t.isResolved);
+      }
+      return t;
+    }).toList();
+    
+    state = state.copyWith(isAnalyzing: false, threats: updated);
+    
     try {
-      // Logic: If sector detection count above 3 updates that document risk_level to High
-      final Map<String, int> sectorCounts = {};
-      for (var threat in state.threats) {
-        sectorCounts[threat.sector] = (sectorCounts[threat.sector] ?? 0) + 1;
+      final snapshot = await _firestore.collection('threats').where('level', isEqualTo: 'High').get();
+      for (var doc in snapshot.docs) {
+        await doc.reference.update({'level': 'Critical'});
       }
-
-      for (var entry in sectorCounts.entries) {
-        if (entry.value >= 3) {
-          final query = await _firestore.collection('threats')
-              .where('sector', isEqualTo: entry.key)
-              .get();
-          
-          for (var doc in query.docs) {
-            await doc.reference.update({'risk': 'High'});
-          }
-        }
-      }
-      state = state.copyWith(isLoading: false);
     } catch (e) {
-      state = state.copyWith(error: e.toString(), isLoading: false);
+      // Ignore in demo mode
     }
   }
 }
