@@ -1,0 +1,67 @@
+/// ================================================
+/// File    : sales_provider.dart
+/// Module  : Providers
+/// Desc    : Sales intelligence state
+/// Author  : AMOPS Dev Team
+/// Date    : May 2026
+/// ================================================
+
+import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
+import '../models/sales_model.dart';
+
+class SalesState {
+  final List<SalesModel> deals;
+  final bool isLoading;
+  final String? error;
+
+  SalesState({
+    this.deals = const [],
+    this.isLoading = false,
+    this.error,
+  });
+
+  SalesState copyWith({
+    List<SalesModel>? deals,
+    bool? isLoading,
+    String? error,
+  }) {
+    return SalesState(
+      deals: deals ?? this.deals,
+      isLoading: isLoading ?? this.isLoading,
+      error: error,
+    );
+  }
+}
+
+class SalesNotifier extends StateNotifier<SalesState> {
+  final FirebaseFirestore _firestore = FirebaseFirestore.instance;
+
+  SalesNotifier() : super(SalesState()) {
+    _initDeals();
+  }
+
+  void _initDeals() {
+    state = state.copyWith(isLoading: true);
+    _firestore.collection('sales_deals').snapshots().listen((snapshot) {
+      final deals = snapshot.docs
+          .map((doc) => SalesModel.fromMap(doc.data(), doc.id))
+          .toList();
+      state = state.copyWith(deals: deals, isLoading: false);
+    }, onError: (e) {
+      state = state.copyWith(error: e.toString(), isLoading: false);
+    });
+  }
+
+  Future<void> advanceDealStage(String id, String nextStage) async {
+    try {
+      await _firestore.collection('sales_deals').doc(id).update({'stage': nextStage});
+    } catch (e) {
+      state = state.copyWith(error: e.toString());
+    }
+  }
+}
+
+final salesProvider = StateNotifierProvider<SalesNotifier, SalesState>((ref) {
+  return SalesNotifier();
+});
