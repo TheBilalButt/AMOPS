@@ -44,23 +44,28 @@ class VehicleNotifier extends StateNotifier<VehicleState> {
 
   void _initVehicles() {
     state = state.copyWith(isLoading: true);
+    
+    final mockVehicles = [
+      VehicleModel(id: 'Tank-001', type: 'Tank', fuel: 78, ammo: 85, engineHours: 320, status: 'Operational', readiness: 88),
+      VehicleModel(id: 'Tank-002', type: 'Tank', fuel: 45, ammo: 60, engineHours: 510, status: 'Maintenance', readiness: 42),
+      VehicleModel(id: 'APC-001', type: 'APC', fuel: 55, ammo: 70, engineHours: 380, status: 'Operational', readiness: 72),
+    ];
+
     _firestore.collection('vehicles').snapshots().listen((snapshot) {
       final vehicles = snapshot.docs
           .map((doc) => VehicleModel.fromMap(doc.data(), doc.id))
           .toList();
       
-      DatabaseHelper.instance.cacheData(
-        'vehicles_cache', 
-        vehicles.map((v) => v.toMap()).toList()
-      );
-      
-      state = state.copyWith(vehicles: vehicles, isLoading: false, error: null);
+      if (vehicles.isEmpty) {
+        state = state.copyWith(vehicles: mockVehicles, isLoading: false, error: "Demo Mode");
+      } else {
+        DatabaseHelper.instance.cacheData(
+          'vehicles_cache', 
+          vehicles.map((v) => v.toMap()).toList()
+        );
+        state = state.copyWith(vehicles: vehicles, isLoading: false, error: null);
+      }
     }, onError: (e) {
-      final mockVehicles = [
-        VehicleModel(id: 'Tank-001', type: 'Tank', fuel: 78, ammo: 85, engineHours: 320, status: 'Operational', readiness: 88),
-        VehicleModel(id: 'Tank-002', type: 'Tank', fuel: 45, ammo: 60, engineHours: 510, status: 'Maintenance', readiness: 42),
-        VehicleModel(id: 'APC-001', type: 'APC', fuel: 55, ammo: 70, engineHours: 380, status: 'Operational', readiness: 72),
-      ];
       state = state.copyWith(vehicles: mockVehicles, isLoading: false, error: "Demo Mode");
     });
   }

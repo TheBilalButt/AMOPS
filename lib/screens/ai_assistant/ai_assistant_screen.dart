@@ -95,7 +95,7 @@ class _AIAssistantScreenState extends ConsumerState<AIAssistantScreen> {
       appBar: AppBar(
         title: const Row(
           children: [
-            Icon(Icons.robot_2_outlined),
+            Icon(Icons.smart_toy_outlined),
             SizedBox(width: 12),
             Text("AMOPS AI Assistant"),
           ],

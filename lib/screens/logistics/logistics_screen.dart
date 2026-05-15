@@ -103,7 +103,7 @@ class LogisticsScreen extends ConsumerWidget {
       color: AppColors.primary.withOpacity(0.1),
       shape: RoundedRectangleBorder(
         borderRadius: BorderRadius.circular(12),
-        border: const BorderSide(color: AppColors.primary, width: 1),
+        side: const BorderSide(color: AppColors.primary, width: 1),
       ),
       child: Padding(
         padding: const EdgeInsets.all(16.0),

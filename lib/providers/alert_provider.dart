@@ -43,6 +43,13 @@ class AlertNotifier extends StateNotifier<AlertState> {
 
   void _initAlerts() {
     state = state.copyWith(isLoading: true);
+    
+    final mockAlerts = [
+      AlertModel(id: 'ALT-1', title: 'Drone Battery Critical', message: 'DRONE-005 battery below 10%', level: 'Critical', timestamp: DateTime.now(), isRead: false),
+      AlertModel(id: 'ALT-2', title: 'Sector Intrusion', message: 'Unknown activity in Sector Alpha', level: 'High', timestamp: DateTime.now().subtract(const Duration(minutes: 5)), isRead: false),
+      AlertModel(id: 'ALT-3', title: 'Maintenance Due', message: 'Tank-002 reached 500 hours', level: 'Medium', timestamp: DateTime.now().subtract(const Duration(hours: 1)), isRead: true),
+    ];
+
     _firestore.collection('alerts')
         .orderBy('timestamp', descending: true)
         .snapshots()
@@ -50,13 +57,13 @@ class AlertNotifier extends StateNotifier<AlertState> {
       final alerts = snapshot.docs
           .map((doc) => AlertModel.fromMap(doc.data(), doc.id))
           .toList();
-      state = state.copyWith(alerts: alerts, isLoading: false, error: null);
+      
+      if (alerts.isEmpty) {
+        state = state.copyWith(alerts: mockAlerts, isLoading: false, error: "Demo Mode");
+      } else {
+        state = state.copyWith(alerts: alerts, isLoading: false, error: null);
+      }
     }, onError: (e) {
-      final mockAlerts = [
-        AlertModel(id: 'ALT-1', title: 'Drone Battery Critical', message: 'DRONE-005 battery below 10%', level: 'Critical', timestamp: 'Just now', isRead: false),
-        AlertModel(id: 'ALT-2', title: 'Sector Intrusion', message: 'Unknown activity in Sector Alpha', level: 'High', timestamp: '5 mins ago', isRead: false),
-        AlertModel(id: 'ALT-3', title: 'Maintenance Due', message: 'Tank-002 reached 500 hours', level: 'Medium', timestamp: '1 hour ago', isRead: true),
-      ];
       state = state.copyWith(alerts: mockAlerts, isLoading: false, error: "Demo Mode");
     });
   }

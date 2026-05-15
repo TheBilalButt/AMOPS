@@ -47,17 +47,24 @@ class ThreatNotifier extends StateNotifier<ThreatState> {
 
   void _initThreats() {
     state = state.copyWith(isLoading: true);
+    
+    final mockThreats = [
+      ThreatModel(id: 'TH-001', type: 'Intrusion', risk: 'High', sector: 'Alpha', description: 'Unauthorized entry detected', timestamp: DateTime.now()),
+      ThreatModel(id: 'TH-002', type: 'UAV Detected', risk: 'Medium', sector: 'Bravo', description: 'Low altitude drone flight', timestamp: DateTime.now().subtract(const Duration(minutes: 15))),
+      ThreatModel(id: 'TH-003', type: 'Signal Jamming', risk: 'Critical', sector: 'Charlie', description: 'Electronic warfare activity', timestamp: DateTime.now().subtract(const Duration(minutes: 5))),
+    ];
+
     _firestore.collection('threats').snapshots().listen((snapshot) {
       final threats = snapshot.docs
           .map((doc) => ThreatModel.fromMap(doc.data(), doc.id))
           .toList();
-      state = state.copyWith(threats: threats, isLoading: false, error: null);
+      
+      if (threats.isEmpty) {
+        state = state.copyWith(threats: mockThreats, isLoading: false, error: "Demo Mode");
+      } else {
+        state = state.copyWith(threats: threats, isLoading: false, error: null);
+      }
     }, onError: (e) {
-      final mockThreats = [
-        ThreatModel(id: 'TH-001', type: 'Intrusion', level: 'High', sector: 'Alpha', time: '10:45 AM', isResolved: false),
-        ThreatModel(id: 'TH-002', type: 'UAV Detected', level: 'Medium', sector: 'Bravo', time: '11:15 AM', isResolved: false),
-        ThreatModel(id: 'TH-003', type: 'Signal Jamming', level: 'Critical', sector: 'Charlie', time: '12:00 PM', isResolved: false),
-      ];
       state = state.copyWith(threats: mockThreats, isLoading: false, error: "Demo Mode");
     });
   }
@@ -66,9 +73,9 @@ class ThreatNotifier extends StateNotifier<ThreatState> {
     state = state.copyWith(isAnalyzing: true);
     await Future.delayed(const Duration(seconds: 2));
     
-    final updated = state.threats.map((t) {
-      if (t.level == 'High') {
-        return ThreatModel(id: t.id, type: t.type, level: 'Critical', sector: t.sector, time: t.time, isResolved: t.isResolved);
+    final List<ThreatModel> updated = state.threats.map((t) {
+      if (t.risk == 'High') {
+        return ThreatModel(id: t.id, type: t.type, risk: 'Critical', sector: t.sector, description: t.description, timestamp: t.timestamp);
       }
       return t;
     }).toList();

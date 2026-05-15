@@ -43,17 +43,24 @@ class MaintenanceNotifier extends StateNotifier<MaintenanceState> {
 
   void _initLogs() {
     state = state.copyWith(isLoading: true);
+    
+    final mockLogs = [
+      MaintenanceModel(id: 'LOG-1', vehicleId: 'Tank-002', fault: 'Engine Overheating', technician: 'Tech A', date: '2026-05-14', status: 'Open'),
+      MaintenanceModel(id: 'LOG-2', vehicleId: 'APC-001', fault: 'Track Wear', technician: 'Tech B', date: '2026-05-10', status: 'In Progress'),
+      MaintenanceModel(id: 'LOG-3', vehicleId: 'DRONE-003', fault: 'Battery Drain', technician: 'Tech C', date: '2026-05-15', status: 'Resolved'),
+    ];
+
     _firestore.collection('maintenance_logs').snapshots().listen((snapshot) {
       final logs = snapshot.docs
           .map((doc) => MaintenanceModel.fromMap(doc.data(), doc.id))
           .toList();
-      state = state.copyWith(logs: logs, isLoading: false, error: null);
+      
+      if (logs.isEmpty) {
+        state = state.copyWith(logs: mockLogs, isLoading: false, error: "Demo Mode");
+      } else {
+        state = state.copyWith(logs: logs, isLoading: false, error: null);
+      }
     }, onError: (e) {
-      final mockLogs = [
-        MaintenanceModel(id: 'LOG-1', vehicleId: 'Tank-002', fault: 'Engine Overheating', technician: 'Tech A', date: '2026-05-14', status: 'Open'),
-        MaintenanceModel(id: 'LOG-2', vehicleId: 'APC-001', fault: 'Track Wear', technician: 'Tech B', date: '2026-05-10', status: 'In Progress'),
-        MaintenanceModel(id: 'LOG-3', vehicleId: 'DRONE-003', fault: 'Battery Drain', technician: 'Tech C', date: '2026-05-15', status: 'Resolved'),
-      ];
       state = state.copyWith(logs: mockLogs, isLoading: false, error: "Demo Mode");
     });
   }

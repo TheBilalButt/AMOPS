@@ -43,23 +43,30 @@ class ManufacturingNotifier extends StateNotifier<ManufacturingState> {
 
   void _initOrders() {
     state = state.copyWith(isLoading: true);
+    
+    final mockOrders = [
+      ProductionModel(id: 'MFG-001', vehicleType: 'Al-Khalid Tank', quantity: 50, expectedDate: '2026-12-01', progress: 45, status: 'In Production'),
+      ProductionModel(id: 'MFG-002', vehicleType: 'Burraq UCAV', quantity: 120, expectedDate: '2026-08-15', progress: 85, status: 'Testing'),
+      ProductionModel(id: 'MFG-003', vehicleType: 'Maaz APC', quantity: 200, expectedDate: '2027-01-10', progress: 10, status: 'Planning'),
+    ];
+
     _firestore.collection('manufacturing_orders').snapshots().listen((snapshot) {
       final orders = snapshot.docs
           .map((doc) => ProductionModel.fromMap(doc.data(), doc.id))
           .toList();
-      state = state.copyWith(orders: orders, isLoading: false, error: null);
+      
+      if (orders.isEmpty) {
+        state = state.copyWith(orders: mockOrders, isLoading: false, error: "Demo Mode");
+      } else {
+        state = state.copyWith(orders: orders, isLoading: false, error: null);
+      }
     }, onError: (e) {
-      final mockOrders = [
-        ProductionModel(id: 'MFG-001', vehicleType: 'Al-Khalid Tank', quantity: 50, expectedDate: '2026-12-01', progress: 45, status: 'In Production'),
-        ProductionModel(id: 'MFG-002', vehicleType: 'Burraq UCAV', quantity: 120, expectedDate: '2026-08-15', progress: 85, status: 'Testing'),
-        ProductionModel(id: 'MFG-003', vehicleType: 'Maaz APC', quantity: 200, expectedDate: '2027-01-10', progress: 10, status: 'Planning'),
-      ];
       state = state.copyWith(orders: mockOrders, isLoading: false, error: "Demo Mode");
     });
   }
 
   Future<void> incrementProgress(String id) async {
-    final updated = state.orders.map((o) {
+    final List<ProductionModel> updated = state.orders.map((o) {
       if (o.id == id) {
         final newProgress = (o.progress + 10).clamp(0, 100);
         final newStatus = newProgress == 100 ? 'Completed' : o.status;

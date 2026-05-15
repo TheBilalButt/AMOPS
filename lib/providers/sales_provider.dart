@@ -43,17 +43,24 @@ class SalesNotifier extends StateNotifier<SalesState> {
 
   void _initDeals() {
     state = state.copyWith(isLoading: true);
+    
+    final mockDeals = [
+      SalesModel(id: 'DEAL-001', country: 'Saudi Arabia', product: 'Al-Khalid MBT x40', value: '120M', stage: 'Negotiation', winProbability: 75),
+      SalesModel(id: 'DEAL-002', country: 'Qatar', product: 'Burraq UCAV System', value: '85M', stage: 'Quote', winProbability: 60),
+      SalesModel(id: 'DEAL-003', country: 'Malaysia', product: 'Small Arms Package', value: '15M', stage: 'Lead', winProbability: 30),
+    ];
+
     _firestore.collection('sales_deals').snapshots().listen((snapshot) {
       final deals = snapshot.docs
           .map((doc) => SalesModel.fromMap(doc.data(), doc.id))
           .toList();
-      state = state.copyWith(deals: deals, isLoading: false, error: null);
+      
+      if (deals.isEmpty) {
+        state = state.copyWith(deals: mockDeals, isLoading: false, error: "Demo Mode");
+      } else {
+        state = state.copyWith(deals: deals, isLoading: false, error: null);
+      }
     }, onError: (e) {
-      final mockDeals = [
-        SalesModel(id: 'DEAL-001', country: 'Saudi Arabia', product: 'Al-Khalid MBT x40', value: '120M', stage: 'Negotiation', winProbability: 75),
-        SalesModel(id: 'DEAL-002', country: 'Qatar', product: 'Burraq UCAV System', value: '85M', stage: 'Quote', winProbability: 60),
-        SalesModel(id: 'DEAL-003', country: 'Malaysia', product: 'Small Arms Package', value: '15M', stage: 'Lead', winProbability: 30),
-      ];
       state = state.copyWith(deals: mockDeals, isLoading: false, error: "Demo Mode");
     });
   }

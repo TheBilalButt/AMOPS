@@ -9,6 +9,7 @@
 class ProductionModel {
   final String id;
   final String vehicleType;
+  final int quantity;
   final int progress;
   final String status;
   final String expectedDate;
@@ -16,6 +17,7 @@ class ProductionModel {
   ProductionModel({
     required this.id,
     required this.vehicleType,
+    required this.quantity,
     required this.progress,
     required this.status,
     required this.expectedDate,
@@ -24,6 +26,7 @@ class ProductionModel {
   Map<String, dynamic> toMap() {
     return {
       'vehicle_type': vehicleType,
+      'quantity': quantity,
       'progress': progress,
       'status': status,
       'expected_date': expectedDate,
@@ -34,6 +37,7 @@ class ProductionModel {
     return ProductionModel(
       id: id,
       vehicleType: map['vehicle_type'] ?? '',
+      quantity: map['quantity'] ?? 0,
       progress: map['progress'] ?? 0,
       status: map['status'] ?? 'Scheduled',
       expectedDate: map['expected_date'] ?? '',

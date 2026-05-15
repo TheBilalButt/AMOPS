@@ -44,25 +44,30 @@ class DroneNotifier extends StateNotifier<DroneState> {
 
   void _initDrones() {
     state = state.copyWith(isLoading: true);
+    
+    final mockDrones = [
+      DroneModel(id: 'DRONE-001', battery: 85, altitude: 120, signal: 90, status: 'Active', camera: 'Online'),
+      DroneModel(id: 'DRONE-002', battery: 42, altitude: 85, signal: 75, status: 'Active', camera: 'Online'),
+      DroneModel(id: 'DRONE-003', battery: 18, altitude: 0, signal: 20, status: 'Returning', camera: 'Offline'),
+      DroneModel(id: 'DRONE-004', battery: 95, altitude: 200, signal: 95, status: 'Active', camera: 'Online'),
+      DroneModel(id: 'DRONE-005', battery: 8, altitude: 0, signal: 10, status: 'Critical', camera: 'Offline'),
+    ];
+
     _firestore.collection('drones').snapshots().listen((snapshot) {
       final drones = snapshot.docs
           .map((doc) => DroneModel.fromMap(doc.data(), doc.id))
           .toList();
       
-      DatabaseHelper.instance.cacheData(
-        'drones_cache', 
-        drones.map((d) => d.toMap()).toList()
-      );
-      
-      state = state.copyWith(drones: drones, isLoading: false, error: null);
+      if (drones.isEmpty) {
+        state = state.copyWith(drones: mockDrones, isLoading: false, error: "Demo Mode");
+      } else {
+        DatabaseHelper.instance.cacheData(
+          'drones_cache', 
+          drones.map((d) => d.toMap()).toList()
+        );
+        state = state.copyWith(drones: drones, isLoading: false, error: null);
+      }
     }, onError: (e) {
-      final mockDrones = [
-        DroneModel(id: 'DRONE-001', battery: 85, altitude: 120, signal: 90, status: 'Active', camera: 'Online'),
-        DroneModel(id: 'DRONE-002', battery: 42, altitude: 85, signal: 75, status: 'Active', camera: 'Online'),
-        DroneModel(id: 'DRONE-003', battery: 18, altitude: 0, signal: 20, status: 'Returning', camera: 'Offline'),
-        DroneModel(id: 'DRONE-004', battery: 95, altitude: 200, signal: 95, status: 'Active', camera: 'Online'),
-        DroneModel(id: 'DRONE-005', battery: 8, altitude: 0, signal: 10, status: 'Critical', camera: 'Offline'),
-      ];
       state = state.copyWith(drones: mockDrones, isLoading: false, error: "Demo Mode");
     });
   }

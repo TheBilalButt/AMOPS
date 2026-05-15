@@ -43,25 +43,32 @@ class LogisticsNotifier extends StateNotifier<LogisticsState> {
 
   void _initSupplies() {
     state = state.copyWith(isLoading: true);
+    
+    final mockSupplies = [
+      SupplyModel(id: 'SUP-001', name: '120mm Tank Rounds', current: 45, threshold: 50, unit: 'units'),
+      SupplyModel(id: 'SUP-002', name: 'Drone Batteries', current: 15, threshold: 30, unit: 'percent'),
+      SupplyModel(id: 'SUP-003', name: 'Aviation Fuel', current: 85, threshold: 40, unit: 'percent'),
+    ];
+
     _firestore.collection('supply_items').snapshots().listen((snapshot) {
       final supplies = snapshot.docs
           .map((doc) => SupplyModel.fromMap(doc.data(), doc.id))
           .toList();
-      state = state.copyWith(supplies: supplies, isLoading: false, error: null);
+      
+      if (supplies.isEmpty) {
+        state = state.copyWith(supplies: mockSupplies, isLoading: false, error: "Demo Mode");
+      } else {
+        state = state.copyWith(supplies: supplies, isLoading: false, error: null);
+      }
     }, onError: (e) {
-      final mockSupplies = [
-        SupplyModel(id: 'SUP-001', name: '120mm Tank Rounds', category: 'Ammunition', current: 200, required: 500),
-        SupplyModel(id: 'SUP-002', name: 'Drone Batteries', category: 'Electronics', current: 45, required: 50),
-        SupplyModel(id: 'SUP-003', name: 'Aviation Fuel', category: 'Fuel', current: 12000, required: 50000),
-      ];
       state = state.copyWith(supplies: mockSupplies, isLoading: false, error: "Demo Mode");
     });
   }
 
   Future<void> triggerResupply(String id, int amount) async {
-    final updated = state.supplies.map((s) {
+    final List<SupplyModel> updated = state.supplies.map((s) {
       if (s.id == id) {
-        return SupplyModel(id: s.id, name: s.name, category: s.category, current: s.current + amount, required: s.required);
+        return SupplyModel(id: s.id, name: s.name, current: (s.current + amount).clamp(0, 100), threshold: s.threshold, unit: s.unit);
       }
       return s;
     }).toList();

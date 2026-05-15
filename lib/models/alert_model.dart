@@ -12,6 +12,7 @@ class AlertModel {
   final String message;
   final String level; // Critical, Warning, Info
   final DateTime timestamp;
+  final bool isRead;
 
   AlertModel({
     required this.id,
@@ -19,6 +20,7 @@ class AlertModel {
     required this.message,
     required this.level,
     required this.timestamp,
+    this.isRead = false,
   });
 
   Map<String, dynamic> toMap() {
@@ -27,6 +29,7 @@ class AlertModel {
       'message': message,
       'level': level,
       'timestamp': timestamp.toIso8601String(),
+      'isRead': isRead,
     };
   }
 
@@ -39,6 +42,7 @@ class AlertModel {
       timestamp: map['timestamp'] != null 
           ? DateTime.parse(map['timestamp']) 
           : DateTime.now(),
+      isRead: map['isRead'] ?? false,
     );
   }
 }
