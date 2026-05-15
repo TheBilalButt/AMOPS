@@ -38,7 +38,10 @@ class DashboardNotifier extends StateNotifier<DashboardState> {
         await SharedPrefsHelper.setDataSeeded(true);
         state = DashboardState(isSeeding: false);
       } catch (e) {
-        state = DashboardState(isSeeding: false, error: e.toString());
+        // If Firebase fails, we still mark as seeded to avoid infinite retry,
+        // and the app will rely on local mock logic or providers handling empty states.
+        await SharedPrefsHelper.setDataSeeded(true);
+        state = DashboardState(isSeeding: false, error: "Cloud connection failed. Using local demo mode.");
       }
     }
   }
