@@ -64,6 +64,25 @@ class AuthNotifier extends StateNotifier<AuthState> {
     state = state.copyWith(isLoading: false);
   }
 
+  Future<bool> loginWithRole(String role) async {
+    state = state.copyWith(isLoading: true, error: null);
+    await Future.delayed(const Duration(milliseconds: 1500)); // Simulate secure network delay with animations
+
+    String uid = "MOCK_USER_${role.replaceAll(' ', '_').toUpperCase()}";
+    String email = "${role.replaceAll(' ', '.').toLowerCase()}@amops.mil.pk";
+    
+    final mockUser = UserModel(
+      uid: uid,
+      name: "$role Officer",
+      email: email,
+      role: role,
+    );
+
+    await SharedPrefsHelper.saveUserSession(mockUser.uid, mockUser.role);
+    state = state.copyWith(user: mockUser, isLoading: false);
+    return true;
+  }
+
   Future<bool> login(String email, String password) async {
     state = state.copyWith(isLoading: true, error: null);
     

@@ -24,6 +24,7 @@ import '../screens/ai_assistant/ai_assistant_screen.dart';
 import '../providers/dashboard_provider.dart';
 import '../core/constants/app_colors.dart';
 import '../widgets/loading_widget.dart';
+import '../screens/supabase_sync/supabase_sync_screen.dart';
 
 class AmopsApp extends ConsumerWidget {
   const AmopsApp({super.key});
@@ -109,16 +110,39 @@ class AppDrawer extends ConsumerWidget {
           UserAccountsDrawerHeader(
             decoration: const BoxDecoration(color: AppColors.card),
             accountName: Text(user?.name ?? "User", style: const TextStyle(color: AppColors.primary, fontWeight: FontWeight.bold)),
-            accountEmail: Text(user?.email ?? "", style: const TextStyle(color: Colors.white60)),
+            accountEmail: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(user?.email ?? "", style: const TextStyle(color: Colors.white60)),
+                const SizedBox(height: 4),
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                  decoration: BoxDecoration(
+                    color: AppColors.primary.withOpacity(0.2),
+                    borderRadius: BorderRadius.circular(4),
+                    border: Border.all(color: AppColors.primary),
+                  ),
+                  child: Text(
+                    user?.role ?? "Guest",
+                    style: const TextStyle(color: AppColors.primary, fontSize: 10, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ],
+            ),
             currentAccountPicture: CircleAvatar(
               backgroundColor: AppColors.primary,
               child: Text(user?.name.isNotEmpty == true ? user!.name[0].toUpperCase() : "U", style: const TextStyle(color: Colors.black)),
             ),
           ),
+          
           _buildDrawerItem(context, Icons.build, AppStrings.maintenance, const MaintenanceScreen()),
-          _buildDrawerItem(context, Icons.factory, AppStrings.manufacturing, const ManufacturingScreen()),
-          _buildDrawerItem(context, Icons.trending_up, AppStrings.sales, const SalesScreen()),
+          if (user?.role == 'Base Commander') ...[
+            _buildDrawerItem(context, Icons.factory, AppStrings.manufacturing, const ManufacturingScreen()),
+            _buildDrawerItem(context, Icons.trending_up, AppStrings.sales, const SalesScreen()),
+          ],
           _buildDrawerItem(context, Icons.psychology, AppStrings.aiAssistant, const AIAssistantScreen()),
+          if (user?.role == 'Base Commander' || user?.role == 'Fleet Operator')
+            _buildDrawerItem(context, Icons.sync_alt, "Supabase Sync Hub", const SupabaseSyncScreen()),
           const Spacer(),
           const Divider(color: Colors.white10),
           ListTile(
