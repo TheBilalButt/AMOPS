@@ -41,21 +41,17 @@ class _TechLottieState extends State<TechLottie> with SingleTickerProviderStateM
     return SizedBox(
       height: widget.size,
       width: widget.size,
-      child: Lottie.network(
-        widget.url,
+      child: Lottie.asset(
+        'assets/lottie/logo.json',
         fit: BoxFit.contain,
         errorBuilder: (context, error, stackTrace) {
-          return widget.fallback ?? _buildDefaultFallback();
+          return const Center(
+            child: CircularProgressIndicator(
+              color: AppColors.primary,
+              strokeWidth: 3,
+            ),
+          );
         },
-      ),
-    );
-  }
-
-  Widget _buildDefaultFallback() {
-    return const Center(
-      child: CircularProgressIndicator(
-        color: AppColors.primary,
-        strokeWidth: 3,
       ),
     );
   }
