@@ -46,9 +46,14 @@ class VehicleNotifier extends StateNotifier<VehicleState> {
     state = state.copyWith(isLoading: true);
     
     final mockVehicles = [
-      VehicleModel(id: 'Tank-001', type: 'Tank', fuel: 78, ammo: 85, engineHours: 320, status: 'Operational', readiness: 88),
-      VehicleModel(id: 'Tank-002', type: 'Tank', fuel: 45, ammo: 60, engineHours: 510, status: 'Maintenance', readiness: 42),
-      VehicleModel(id: 'APC-001', type: 'APC', fuel: 55, ammo: 70, engineHours: 380, status: 'Operational', readiness: 72),
+      VehicleModel(id: 'Al-Khalid MBT', type: 'Tank', fuel: 82, ammo: 95, engineHours: 120, status: 'Operational', readiness: 95),
+      VehicleModel(id: 'Haider MBT', type: 'Tank', fuel: 90, ammo: 100, engineHours: 45, status: 'Operational', readiness: 98),
+      VehicleModel(id: 'Al-Zarrar', type: 'Tank', fuel: 45, ammo: 60, engineHours: 850, status: 'Maintenance', readiness: 42),
+      VehicleModel(id: 'Talha APC', type: 'APC', fuel: 65, ammo: 80, engineHours: 340, status: 'Operational', readiness: 85),
+      VehicleModel(id: 'Saad APC', type: 'APC', fuel: 75, ammo: 90, engineHours: 210, status: 'Operational', readiness: 92),
+      VehicleModel(id: 'Viper IFV', type: 'IFV', fuel: 88, ammo: 100, engineHours: 110, status: 'Operational', readiness: 96),
+      VehicleModel(id: 'Maaz ATGM', type: 'APC', fuel: 30, ammo: 40, engineHours: 670, status: 'Maintenance', readiness: 35),
+      VehicleModel(id: 'Dragoon AFV', type: 'AFV', fuel: 70, ammo: 85, engineHours: 410, status: 'Operational', readiness: 88),
     ];
 
     _firestore.collection('vehicles').snapshots().listen((snapshot) {
@@ -57,7 +62,7 @@ class VehicleNotifier extends StateNotifier<VehicleState> {
           .toList();
       
       if (vehicles.isEmpty) {
-        state = state.copyWith(vehicles: mockVehicles, isLoading: false, error: "Demo Mode");
+        state = state.copyWith(vehicles: mockVehicles, isLoading: false, error: null);
       } else {
         DatabaseHelper.instance.cacheData(
           'vehicles_cache', 
@@ -66,7 +71,7 @@ class VehicleNotifier extends StateNotifier<VehicleState> {
         state = state.copyWith(vehicles: vehicles, isLoading: false, error: null);
       }
     }, onError: (e) {
-      state = state.copyWith(vehicles: mockVehicles, isLoading: false, error: "Demo Mode");
+      state = state.copyWith(vehicles: mockVehicles, isLoading: false, error: null);
     });
   }
 

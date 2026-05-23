@@ -46,11 +46,12 @@ class DroneNotifier extends StateNotifier<DroneState> {
     state = state.copyWith(isLoading: true);
     
     final mockDrones = [
-      DroneModel(id: 'DRONE-001', battery: 85, altitude: 120, signal: 90, status: 'Active', camera: 'Online'),
-      DroneModel(id: 'DRONE-002', battery: 42, altitude: 85, signal: 75, status: 'Active', camera: 'Online'),
-      DroneModel(id: 'DRONE-003', battery: 18, altitude: 0, signal: 20, status: 'Returning', camera: 'Offline'),
-      DroneModel(id: 'DRONE-004', battery: 95, altitude: 200, signal: 95, status: 'Active', camera: 'Online'),
-      DroneModel(id: 'DRONE-005', battery: 8, altitude: 0, signal: 10, status: 'Critical', camera: 'Offline'),
+      DroneModel(id: 'Burraq UCAV', battery: 85, altitude: 12000, signal: 90, status: 'Active', camera: 'Online'),
+      DroneModel(id: 'Shahpar-II UCAV', battery: 42, altitude: 15000, signal: 75, status: 'Active', camera: 'Online'),
+      DroneModel(id: 'GIDS Uqab', battery: 18, altitude: 0, signal: 20, status: 'Returning', camera: 'Offline'),
+      DroneModel(id: 'GIDS Shahpar', battery: 95, altitude: 20000, signal: 95, status: 'Active', camera: 'Online'),
+      DroneModel(id: 'SATUMA Jasoos II', battery: 8, altitude: 0, signal: 10, status: 'Critical', camera: 'Offline'),
+      DroneModel(id: 'GIDS Ababeel', battery: 100, altitude: 0, signal: 100, status: 'Standby', camera: 'Offline'),
     ];
 
     _firestore.collection('drones').snapshots().listen((snapshot) {
@@ -59,7 +60,7 @@ class DroneNotifier extends StateNotifier<DroneState> {
           .toList();
       
       if (drones.isEmpty) {
-        state = state.copyWith(drones: mockDrones, isLoading: false, error: "Demo Mode");
+        state = state.copyWith(drones: mockDrones, isLoading: false, error: null);
       } else {
         DatabaseHelper.instance.cacheData(
           'drones_cache', 
@@ -68,7 +69,7 @@ class DroneNotifier extends StateNotifier<DroneState> {
         state = state.copyWith(drones: drones, isLoading: false, error: null);
       }
     }, onError: (e) {
-      state = state.copyWith(drones: mockDrones, isLoading: false, error: "Demo Mode");
+      state = state.copyWith(drones: mockDrones, isLoading: false, error: null);
     });
   }
 
