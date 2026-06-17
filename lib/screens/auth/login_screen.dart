@@ -17,6 +17,61 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     final authState = ref.watch(authProvider);
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+
+    Widget buildBranding() {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Hero(
+            tag: 'app_logo',
+            child: TechLottie(
+              url: 'https://assets5.lottiefiles.com/packages/lf20_wprbpf4c.json',
+              size: isLandscape ? 120 : 160,
+            ),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            AppStrings.appName,
+            style: TextStyle(
+              color: AppColors.primary,
+              fontSize: isLandscape ? 36 : 48,
+              fontWeight: FontWeight.bold,
+              letterSpacing: 2,
+            ),
+          ),
+          const Text(
+            "SECURE AUTHENTICATION PROTOCOL",
+            style: TextStyle(color: AppColors.textSecondary, fontSize: 10, letterSpacing: 1.5),
+          ),
+        ],
+      );
+    }
+
+    Widget buildRoleSelection() {
+      return Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          const Text(
+            "SELECT OPERATIONS ROLE",
+            textAlign: TextAlign.center,
+            style: TextStyle(
+              color: Colors.white,
+              fontSize: 16,
+              fontWeight: FontWeight.bold,
+            ),
+          ),
+          const SizedBox(height: 20),
+          _buildRoleCard(context, ref, "Base Commander", Icons.star, "Full administrative access"),
+          const SizedBox(height: 12),
+          _buildRoleCard(context, ref, "Logistics Officer", Icons.local_shipping, "Manage supplies and distribution"),
+          const SizedBox(height: 12),
+          _buildRoleCard(context, ref, "Fleet Operator", Icons.airplanemode_active, "Monitor drones and vehicles"),
+        ],
+      );
+    }
 
     return Scaffold(
       body: Container(
@@ -30,73 +85,62 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
             ],
           ),
         ),
-        child: Center(
-          child: SingleChildScrollView(
-            padding: const EdgeInsets.all(24.0),
-            child: Column(
-              mainAxisAlignment: MainAxisAlignment.center,
-              children: [
-                Hero(
-                  tag: 'app_logo',
-                  child: const TechLottie(
-                    url: 'https://assets5.lottiefiles.com/packages/lf20_wprbpf4c.json', // Secure portal radar
-                    size: 160,
-                  ),
-                ),
-                const SizedBox(height: 24),
-                const Text(
-                  AppStrings.appName,
-                  style: TextStyle(
-                    color: AppColors.primary,
-                    fontSize: 48,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 2,
-                  ),
-                ),
-                const Text(
-                  "SECURE AUTHENTICATION PROTOCOL",
-                  style: TextStyle(color: AppColors.textSecondary, fontSize: 12, letterSpacing: 1.5),
-                ),
-                const SizedBox(height: 50),
-                
-                if (authState.isLoading)
-                  const Column(
-                    children: [
-                      CircularProgressIndicator(color: AppColors.primary),
-                      SizedBox(height: 16),
-                      Text("Authenticating role access...", style: TextStyle(color: AppColors.primary)),
-                    ],
-                  )
-                else
-                  Column(
-                    children: [
-                      const Text(
-                        "SELECT OPERATIONS ROLE",
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontSize: 16,
-                          fontWeight: FontWeight.bold,
+        child: SafeArea(
+          child: Center(
+            child: SingleChildScrollView(
+              padding: const EdgeInsets.symmetric(horizontal: 24.0, vertical: 16.0),
+              child: isLandscape
+                  ? Row(
+                      crossAxisAlignment: CrossAxisAlignment.center,
+                      children: [
+                        Expanded(
+                          flex: 5,
+                          child: buildBranding(),
                         ),
-                      ),
-                      const SizedBox(height: 24),
-                      _buildRoleCard(context, ref, "Base Commander", Icons.star, "Full administrative access"),
-                      const SizedBox(height: 16),
-                      _buildRoleCard(context, ref, "Logistics Officer", Icons.local_shipping, "Manage supplies and distribution"),
-                      const SizedBox(height: 16),
-                      _buildRoleCard(context, ref, "Fleet Operator", Icons.airplanemode_active, "Monitor drones and vehicles"),
-                    ],
-                  ),
-                
-                if (authState.error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 24.0),
-                    child: Text(
-                      authState.error!,
-                      style: const TextStyle(color: AppColors.danger),
-                      textAlign: TextAlign.center,
+                        const VerticalDivider(color: Colors.white12, width: 32),
+                        Expanded(
+                          flex: 6,
+                          child: authState.isLoading
+                              ? const Center(
+                                  child: Column(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+                                      CircularProgressIndicator(color: AppColors.primary),
+                                      SizedBox(height: 16),
+                                      Text("Authenticating...", style: TextStyle(color: AppColors.primary)),
+                                    ],
+                                  ),
+                                )
+                              : buildRoleSelection(),
+                        ),
+                      ],
+                    )
+                  : Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        buildBranding(),
+                        const SizedBox(height: 40),
+                        if (authState.isLoading)
+                          const Column(
+                            children: [
+                              CircularProgressIndicator(color: AppColors.primary),
+                              SizedBox(height: 16),
+                              Text("Authenticating role access...", style: TextStyle(color: AppColors.primary)),
+                            ],
+                          )
+                        else
+                          buildRoleSelection(),
+                        if (authState.error != null)
+                          Padding(
+                            padding: const EdgeInsets.only(top: 24.0),
+                            child: Text(
+                              authState.error!,
+                              style: const TextStyle(color: AppColors.danger),
+                              textAlign: TextAlign.center,
+                            ),
+                          ),
+                      ],
                     ),
-                  ),
-              ],
             ),
           ),
         ),

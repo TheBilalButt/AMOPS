@@ -5,6 +5,7 @@
 /// Author  : AMOPS Dev Team
 /// Date    : May 2026
 /// ================================================
+library;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -118,7 +119,7 @@ class AppDrawer extends ConsumerWidget {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
                   decoration: BoxDecoration(
-                    color: AppColors.primary.withOpacity(0.2),
+                    color: AppColors.primary.withValues(alpha: 0.2),
                     borderRadius: BorderRadius.circular(4),
                     border: Border.all(color: AppColors.primary),
                   ),
@@ -134,17 +135,22 @@ class AppDrawer extends ConsumerWidget {
               child: Text(user?.name.isNotEmpty == true ? user!.name[0].toUpperCase() : "U", style: const TextStyle(color: Colors.black)),
             ),
           ),
-          
-          _buildDrawerItem(context, Icons.build, AppStrings.maintenance, const MaintenanceScreen()),
-          if (user?.role == 'Base Commander') ...[
-            _buildDrawerItem(context, Icons.factory, AppStrings.manufacturing, const ManufacturingScreen()),
-            _buildDrawerItem(context, Icons.trending_up, AppStrings.sales, const SalesScreen()),
-          ],
-          _buildDrawerItem(context, Icons.psychology, AppStrings.aiAssistant, const AIAssistantScreen()),
-          if (user?.role == 'Base Commander' || user?.role == 'Fleet Operator')
-            _buildDrawerItem(context, Icons.sync_alt, "Supabase Sync Hub", const SupabaseSyncScreen()),
-          const Spacer(),
-          const Divider(color: Colors.white10),
+          Expanded(
+            child: ListView(
+              padding: EdgeInsets.zero,
+              children: [
+                _buildDrawerItem(context, Icons.build, AppStrings.maintenance, const MaintenanceScreen()),
+                if (user?.role == 'Base Commander') ...[
+                  _buildDrawerItem(context, Icons.factory, AppStrings.manufacturing, const ManufacturingScreen()),
+                  _buildDrawerItem(context, Icons.trending_up, AppStrings.sales, const SalesScreen()),
+                ],
+                _buildDrawerItem(context, Icons.psychology, AppStrings.aiAssistant, const AIAssistantScreen()),
+                if (user?.role == 'Base Commander' || user?.role == 'Fleet Operator')
+                  _buildDrawerItem(context, Icons.sync_alt, "Supabase Sync Hub", const SupabaseSyncScreen()),
+              ],
+            ),
+          ),
+          const Divider(color: Colors.white10, height: 1),
           ListTile(
             leading: const Icon(Icons.logout, color: AppColors.danger),
             title: const Text(AppStrings.logout, style: TextStyle(color: AppColors.danger)),
@@ -153,7 +159,7 @@ class AppDrawer extends ConsumerWidget {
               ref.read(authProvider.notifier).logout();
             },
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 12),
         ],
       ),
     );

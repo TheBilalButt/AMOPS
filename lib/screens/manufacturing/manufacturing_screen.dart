@@ -38,7 +38,7 @@ class ManufacturingScreen extends ConsumerWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 1.5,
+              childAspectRatio: MediaQuery.of(context).orientation == Orientation.landscape ? 3.0 : 1.5,
               children: [
                 StatCard(label: "Total Orders", value: mfgState.orders.length.toString(), icon: Icons.assignment),
                 StatCard(label: "Efficiency", value: "94%", icon: Icons.speed, iconColor: AppColors.success),

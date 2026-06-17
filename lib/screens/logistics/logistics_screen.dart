@@ -46,10 +46,10 @@ class LogisticsScreen extends ConsumerWidget {
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
+              crossAxisCount: MediaQuery.of(context).orientation == Orientation.landscape ? 4 : 2,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: 1.1,
+              childAspectRatio: MediaQuery.of(context).orientation == Orientation.landscape ? 1.5 : 1.1,
               children: logisticsState.supplies.map((supply) {
                 return StatCard(
                   label: supply.name,

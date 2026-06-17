@@ -51,10 +51,10 @@ class DashboardScreen extends ConsumerWidget {
             GridView.count(
               shrinkWrap: true,
               physics: const NeverScrollableScrollPhysics(),
-              crossAxisCount: 2,
+              crossAxisCount: MediaQuery.of(context).orientation == Orientation.landscape ? 4 : 2,
               crossAxisSpacing: 16,
               mainAxisSpacing: 16,
-              childAspectRatio: 1.2,
+              childAspectRatio: MediaQuery.of(context).orientation == Orientation.landscape ? 1.6 : 1.2,
               children: [
                 StatCard(
                   label: "Active Drones",
