@@ -29,7 +29,7 @@ This application strictly adheres to the provided guidelines, utilizing **ONLY**
 *   **Backend & Data**:
     *   **Firebase Authentication**: Implemented for Login and Signup.
     *   **Firebase Firestore**: Designed as the primary real-time database.
-    *   **SQLite**: Integrated for offline caching of critical data (Fleet/Threats).
+    *   **SQLite**: Integrated for offline caching of critical data (Fleet/Threats). The SQLite layer caches Firebase queries locally and restores them seamlessly when internet connectivity is offline.
     *   **Shared Preferences**: Used for persistent session states and user settings (Alert thresholds).
 
 *Note: A "Demo Fallback Mode" is heavily implemented in the providers. If Firebase is unconfigured or blocked, the app automatically fails over to a fully functional local-state mock mode so every button and screen remains interactive for grading.*
