@@ -71,6 +71,8 @@ class DatabaseHelper {
     // Add other tables as needed for offline support
   }
 
+  // Caches a list of map records locally into the specified table inside a single batch transaction.
+  // Uses ConflictAlgorithm.replace to overwrite old cached entries with fresh Firestore sync data.
   Future<void> cacheData(String table, List<Map<String, dynamic>> data) async {
     final db = await instance.database;
     final batch = db.batch();
