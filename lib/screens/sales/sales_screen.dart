@@ -38,7 +38,7 @@ class SalesScreen extends ConsumerWidget {
               crossAxisCount: 2,
               crossAxisSpacing: 12,
               mainAxisSpacing: 12,
-              childAspectRatio: MediaQuery.of(context).orientation == Orientation.landscape ? 3.0 : 1.5,
+              childAspectRatio: MediaQuery.of(context).orientation == Orientation.landscape ? 3.0 : 1.3,
               children: [
                 StatCard(label: "Pipeline Value", value: "145M USD", icon: Icons.monetization_on),
                 StatCard(label: "Win Rate", value: "68%", icon: Icons.trending_up, iconColor: AppColors.success),
